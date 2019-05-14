@@ -4,13 +4,31 @@ from django import http
 import re
 from django.db import DatabaseError
 from django.urls import reverse
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django_redis import get_redis_connection
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from users.models import User
 from meiduo_mall.utils.response_code import RETCODE
 
 # Create your views here.
+
+
+class UserInfoView(LoginRequiredMixin, View):
+    def get(self, request):
+        # if request.user.is_authenticated:
+        #     return render(request, 'user_center_info.html')
+        # else:
+        #     return render(request, 'login.html')
+        return render(request, 'user_center_info.html')
+
+
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        response = redirect(reverse('contents:index'))
+        response.delete_cookie('username')
+        return response
 
 
 class LoginView(View):
@@ -40,7 +58,15 @@ class LoginView(View):
         else:
             request.session.set_expiry(None)
 
-        return redirect(reverse('contents:index'))
+        next = request.GET.get('next')
+        if next:
+            response = redirect(next)
+        else:
+            response = redirect(reverse('contents:index'))
+
+        response.set_cookie('username', username, 3600 * 24 * 15)
+
+        return response
 
 
 class UsernameCountView(View):
