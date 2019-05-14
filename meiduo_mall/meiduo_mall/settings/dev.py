@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'verifications',
 ]
 
-AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -201,3 +200,7 @@ LOGGING = {
         },
     }
 }
+
+AUTH_USER_MODEL = 'users.User'
+
+AUTHENTICATION_BACKENDS = ['users.utils.UsernameModelBackend']
