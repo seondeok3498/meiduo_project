@@ -60,9 +60,9 @@ class RegisterView(View):
         sms_code_server = redis_conn.get('sms_%s' % mobile)
         sms_code_server = sms_code_server.decode()
         if sms_code_server is None:
-            return render(request, 'register.html', {'sms_code_errmsg': '短信验证码已失效!'})
+            return render(request, 'register.html', {'sms_code_errmsg': '短信验证码已失效'})
         if sms_code_client != sms_code_server:
-            return render(request, 'register', {'sms_code_errmsg': '输入短信验证码有误!'})
+            return render(request, 'register', {'sms_code_errmsg': '输入短信验证码有误'})
 
         if allow != 'on':
             return http.HttpResponseForbidden('请勾选用户协议')
