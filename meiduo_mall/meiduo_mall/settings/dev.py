@@ -27,7 +27,7 @@ SECRET_KEY = 'ttc+vpe5_!sw#=l7n*-&2m%_)um9j4_3+$r)%%!c4*@6qvz(o7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'www.meiduo.site']
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'users',
     'contents',
     'verifications',
+    'oauth',
 ]
 
 
@@ -206,3 +207,7 @@ AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = ['users.utils.UsernameModelBackend']
 
 LOGIN_URL = '/login/'
+
+QQ_CLIENT_ID = '101518219'
+QQ_CLIENT_SECRET = '418d84ebdc7241efb79536886ae95224'
+QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback'

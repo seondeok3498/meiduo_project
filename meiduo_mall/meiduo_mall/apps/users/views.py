@@ -48,6 +48,7 @@ class LoginView(View):
             return http.HttpResponseForbidden('密码最少8位，最长20位')
 
         user = authenticate(username=username, password=password)
+        print(type(user))
         if user is None:
             return render(request, 'login.html', {'account_errmsg': '用户名或密码错误'})
 
@@ -132,5 +133,8 @@ class RegisterView(View):
 
         login(request, user)
 
-        return redirect(reverse('contents:index'))
+        response = redirect(reverse('contents:index'))
+        response.set_cookie('username', username, 3600 * 24 * 15)
+        return response
+
 
