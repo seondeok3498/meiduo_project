@@ -1,9 +1,10 @@
+import random
+import logging
+
 from django.shortcuts import render
 from django.views import View
 from django_redis import get_redis_connection
 from django import http
-import random
-import logging
 
 from verifications.libs.captcha.captcha import captcha
 from meiduo_mall.utils.response_code import RETCODE
