@@ -1,26 +1,84 @@
-from django.shortcuts import render, redirect
-from django.views import View
-from django import http
+import json
+import logging
 import re
-from django.db import DatabaseError
-from django.urls import reverse
-from django.contrib.auth import login, authenticate, logout
-from django_redis import get_redis_connection
-from django.contrib.auth.mixins import LoginRequiredMixin
 
-from users.models import User
+from django import http
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import DatabaseError
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.views import View
+from django_redis import get_redis_connection
+
 from meiduo_mall.utils.response_code import RETCODE
+from meiduo_mall.utils.views import LoginRequiredJSONMixin
+from .models import User
+from celery_tasks.email.tasks import send_verify_email
+from .utils import generate_verify_email_url, check_verify_email_token
 
 # Create your views here.
+logger = logging.getLogger('django')
+
+
+class VerifyEmailView(View):
+    def get(self, request):
+        token = request.GET.get('token')
+
+        if not token:
+            return http.HttpResponseForbidden('缺少token')
+
+        user = check_verify_email_token(token)
+        if user is None:
+            return http.HttpResponseBadRequest('无效的token')
+
+        try:
+            user.email_active = True
+            user.save()
+        except Exception as e:
+            logger.error(e)
+            return http.HttpResponseServerError('邮箱激活失败')
+
+        return redirect(reverse('users:info'))
+
+
+class EMailView(LoginRequiredJSONMixin, View):
+    def put(self, request):
+        json_str = request.body.decode()
+        json_dict = json.loads(json_str)
+        email = json_dict.get('email')
+
+        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+            return http.HttpResponseForbidden('参数email有误')
+
+        try:
+            request.user.email = email
+            request.user.save()
+        except Exception as e:
+            logger(e)
+            return http.JsonResponse({
+                'code': RETCODE.DBERR,
+                'errmsg': '添加邮箱失败'
+            })
+
+        verify_url = generate_verify_email_url(request.user)
+        send_verify_email.delay(email, verify_url)
+
+        return http.JsonResponse({
+            'code': RETCODE.OK,
+            'errmsg': 'OK'
+        })
 
 
 class UserInfoView(LoginRequiredMixin, View):
     def get(self, request):
-        # if request.user.is_authenticated:
-        #     return render(request, 'user_center_info.html')
-        # else:
-        #     return render(request, 'login.html')
-        return render(request, 'user_center_info.html')
+        context = {
+            'username': request.user.username,
+            'mobile': request.user.mobile,
+            'email': request.user.email,
+            'email_active': request.user.email_active,
+        }
+        return render(request, 'user_center_info.html', context)
 
 
 class LogoutView(View):
