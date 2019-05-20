@@ -21,6 +21,11 @@ from .utils import generate_verify_email_url, check_verify_email_token
 logger = logging.getLogger('django')
 
 
+class AddressView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'user_center_site.html')
+
+
 class VerifyEmailView(View):
     def get(self, request):
         token = request.GET.get('token')
