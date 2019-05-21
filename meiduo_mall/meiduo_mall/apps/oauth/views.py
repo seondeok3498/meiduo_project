@@ -19,7 +19,7 @@ logger = logging.getLogger('django')
 
 
 class QQAuthUserView(View):
-    def get(self, request):
+    def get(self, request) :
         code = request.GET.get('code')
         next = request.GET.get('state')
         if not code:
@@ -99,7 +99,7 @@ class QQAuthUserView(View):
 
 
 class QQAuthURLView(View):
-    def get(self, request):
+    def get(self, request) :
         next = request.GET.get('next')
         oauth = OAuthQQ(client_id=settings.QQ_CLIENT_ID, client_secret=settings.QQ_CLIENT_SECRET, redirect_uri=settings.QQ_REDIRECT_URI, state=next)
         login_url = oauth.get_qq_url()

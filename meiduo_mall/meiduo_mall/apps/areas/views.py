@@ -13,7 +13,7 @@ logger = logging.getLogger('django')
 
 
 class AreasView(View):
-    def get(self, request):
+    def get(self, request) -> object:
         area_id = request.GET.get('area_id')
         if not area_id:
             province_list = cache.get('province_list')

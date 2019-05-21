@@ -95,6 +95,7 @@ let vm = new Vue({
             this.form_address.email = '';
             this.editing_address_index = '';
         },
+
         // 展示编辑地址弹框
         show_edit_site(index){
             this.is_show_edit = true;
@@ -103,6 +104,7 @@ let vm = new Vue({
             // 只获取要编辑的数据
             this.form_address = JSON.parse(JSON.stringify(this.addresses[index]));
         },
+
         // 校验收货人
         check_receiver(){
             if (!this.form_address.receiver) {
@@ -111,6 +113,7 @@ let vm = new Vue({
                 this.error_receiver = false;
             }
         },
+
         // 校验收货地址
         check_place(){
             if (!this.form_address.place) {
@@ -119,6 +122,7 @@ let vm = new Vue({
                 this.error_place = false;
             }
         },
+
         // 校验手机号
         check_mobile(){
             let re = /^1[3-9]\d{9}$/;
@@ -128,6 +132,7 @@ let vm = new Vue({
                 this.error_mobile = true;
             }
         },
+
         // 校验固定电话
         check_tel(){
             if (this.form_address.tel) {
@@ -141,6 +146,7 @@ let vm = new Vue({
                 this.error_tel = false;
             }
         },
+
         // 校验邮箱
         check_email(){
             if (this.form_address.email) {
@@ -154,6 +160,7 @@ let vm = new Vue({
                 this.error_email = false;
             }
         },
+
         // 清空错误提示信息
         clear_all_errors(){
             this.error_receiver = false;
@@ -162,6 +169,7 @@ let vm = new Vue({
             this.error_tel = false;
             this.error_email = false;
         },
+
         // 获取省份数据
         get_provinces(){
             let url = '/areas/';
@@ -181,6 +189,7 @@ let vm = new Vue({
                     this.provinces = [];
                 })
         },
+
         // 新增地址
         save_address(){
             if (this.error_receiver || this.error_place || this.error_mobile || this.error_email || !this.form_address.province_id || !this.form_address.city_id || !this.form_address.district_id ) {
@@ -235,6 +244,7 @@ let vm = new Vue({
                 }
             }
         },
+
         // 删除地址
         delete_address(index){
             let url = '/addresses/' + this.addresses[index].id + '/';
@@ -258,6 +268,7 @@ let vm = new Vue({
                     console.log(error.response);
                 })
         },
+
         // 设置默认地址
         set_default(index){
             let url = '/addresses/' + this.addresses[index].id + '/default/';
@@ -281,15 +292,18 @@ let vm = new Vue({
                     console.log(error.response);
                 })
         },
+
         // 展示地址title编辑框
         show_edit_title(index){
             this.edit_title_index = index;
         },
+
         // 取消保存地址title
         cancel_title(){
             this.edit_title_index = '';
             this.new_title = '';
         },
+
         // 修改地址title
         save_title(index){
             if (!this.new_title) {

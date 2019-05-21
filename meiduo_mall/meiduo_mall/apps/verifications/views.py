@@ -11,6 +11,7 @@ from meiduo_mall.utils.response_code import RETCODE
 from . import constants
 from verifications.libs.yuntongxun.ccp_sms import CCP
 from celery_tasks.sms.tasks import send_sms_code
+
 # Create your views here.
 
 
