@@ -17,9 +17,59 @@ from .models import User, Address
 from celery_tasks.email.tasks import send_verify_email
 from .utils import generate_verify_email_url, check_verify_email_token
 from . import constants
+from goods.models import SKU
 
 # Create your views here.
 logger = logging.getLogger('django')
+
+
+class UserBrowseHistory(LoginRequiredJSONMixin, View):
+    def post(self, request):
+        sku_id = json.loads(request.body.decode()).get('sku_id')
+
+        try:
+            SKU.objects.get(id=sku_id)
+        except SKU.DoesNotExist:
+            return http.HttpResponseForbidden('sku_id不存在')
+
+        redis_conn = get_redis_connection('history')
+        pl = redis_conn.pipeline()
+        user_id = request.user.id
+
+        pl.lrem('history_%s' % user_id, 0, sku_id)
+        pl.lpush('history_%s' % user_id, sku_id)
+        pl.ltrim('history_%s' % user_id, 0, 4)
+
+        pl.execute()
+
+        return http.JsonResponse({
+            'code': RETCODE.OK,
+            'errmsg': 'OK',
+        })
+
+    def get(self, request):
+        redis_conn = get_redis_connection('history')
+        sku_ids = redis_conn.lrange('history_%s' % request.user.id, 0, -1)
+
+        skus = []
+        for sku_id in sku_ids:
+            try:
+                sku = SKU.objects.get(id=sku_id)
+            except SKU.DoesNotExist:
+                return http.HttpResponseForbidden('sku_id不存在')
+
+            skus.append({
+                'id': sku.id,
+                'name': sku.name,
+                'default_image_url': sku.default_image.url,
+                'price': sku.price,
+            })
+
+        return http.JsonResponse({
+            'code': RETCODE.OK,
+            'errmsg': 'OK',
+            'skus': skus,
+        })
 
 
 class ChangePasswordView(LoginRequiredJSONMixin, View):
@@ -338,7 +388,7 @@ class EMailView(LoginRequiredJSONMixin, View):
 
 
 class UserInfoView(LoginRequiredMixin, View):
-    def get(self, request) :
+    def get(self, request):
         context = {
             'username': request.user.username,
             'mobile': request.user.mobile,
